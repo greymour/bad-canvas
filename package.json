@@ -1,0 +1,14 @@
+{
+  "scripts": {
+    "start": "npx tsx ./main.ts"
+  },
+  "dependencies": {
+    "get-pixels": "^3.3.3",
+    "gm": "^1.25.0",
+    "jpeg-js": "^0.4.4"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.1",
+    "tsx": "^4.19.2"
+  }
+}
