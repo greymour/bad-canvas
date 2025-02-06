@@ -1,4 +1,5 @@
 import BadCanvas from "./BadCanvas";
+import { decodeJPEG } from "./utils/decoders";
 import Matrix from "./utils/Matrix";
 
 type Uint8 = Uint8Array[number]; // making this its own type so I don't forget these are 8 bit ints
@@ -14,7 +15,10 @@ export default class CanvasImage {
   public width: number;
   public height: number;
 
-  constructor(data: Uint8Array, width: number, height: number) {
+  constructor(imageFile: Uint8Array) {
+    const rawImageData = decodeJPEG(imageFile, { useTArray: true });
+    const { data, width, height } = rawImageData;
+
     if (width <= 0) {
       throw new Error(`Received invalid width for CanvasImage constructor: ${width}. Width must be greater than 0.`);
     } else if (height <= 0) {

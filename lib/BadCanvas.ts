@@ -27,7 +27,7 @@ export default class BadCanvas {
     ).join("\n");
   }
 
-  toColourGrid() {
+  render() {
     return this.matrix.data.map((row) =>
       row.map((cell) => cell.toColourBlock()).join("")
     ).join("\n");
