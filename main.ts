@@ -1,13 +1,59 @@
 import CanvasImage from "./lib/CanvasImage";
-import fs from 'node:fs';
+import * as fs from 'node:fs';
+import path from 'path';
+import { Fraction } from "./lib/utils/types";
+import { BadCanvas } from "./lib";
 
-function printImage(path: string): void {
-  const file = fs.readFileSync(path);
-  const canvasImage = new CanvasImage(new Uint8Array(file));
-  const badCanvas = canvasImage.toBadCanvas();
+const imagePathArg = process.argv.find((arg) => arg.startsWith('--path'));
+let imagePath: string = '';
+if (imagePathArg) {
+  imagePath = imagePathArg.split('=')[1];
+  imagePath = path.join(__dirname, imagePath);
+}
 
-  console.log(badCanvas.render());
+const correctionFactorArg = process.argv.find((arg) => arg.startsWith('--cfactor'))
+let correctionFactor = [5, 3];
+if (correctionFactorArg) {
+  const rawFactor = correctionFactorArg.split('=')[1]?.trim();
+  if (rawFactor) {
+    correctionFactor = rawFactor.split('/').map(val => parseInt(val));
+    if (correctionFactor.length !== 2) {
+      throw new Error(`correctionFactor must have the shape 'X/Y', received ${rawFactor}`);
+    }
+  }
+}
+
+if (imagePath) {
+  const file = fs.readFileSync(imagePath);
+  const canvasImage = new CanvasImage(new Uint8Array(file), correctionFactor as Fraction);
+  const bc = canvasImage.toBadCanvas();
+  console.log(bc.render());
 }
 
 
-printImage('./firefox.jpg');
+// create the initial canvas and give it a yellow background
+const badCanvas = new BadCanvas(5, 4, {
+  r: 255,
+  g: 213,
+  b: 40,
+});
+
+// define a list of coordinates that we want to colour black
+const coords = [
+  [1, 1],
+  [3, 1],
+  [0, 2],
+  [4, 2],
+  [1, 3],
+  [2, 3],
+  [3, 3],
+];
+
+// draw a smile!
+coords.forEach(([x, y]) => badCanvas.cellAt(x, y).setColours({
+  r: 0,
+  g: 0,
+  b: 0,
+}));
+
+console.log(badCanvas.render());

@@ -1,13 +1,17 @@
 import { rgbToAnsiTrueColorBG, rgbToAnsiTrueColorFG } from "./utils/colours";
-import { padLeft } from "./utils/numbers";
+import { RGBAPixel } from "./utils/types";
 
-const COLOUR_KEYS = ["r", "g", "b", "a"] as const;
-type ColourKey = typeof COLOUR_KEYS[number];
-type ColourRecord = Record<ColourKey, number>;
+type ColourKey = keyof RGBAPixel;
+
+const COLOUR_KEYS: ColourKey[] = ["r", "g", "b", "a"] as const;
 
 function isColourKey(key: string): key is ColourKey {
   // @ts-expect-error checking for a string in a list of constants, Array.prototype.includes() is so strict
   return COLOUR_KEYS.includes(key);
+}
+
+export type CanvasCellArgs = RGBAPixel & {
+  char?: string;
 }
 
 // Using RGBA for colour values. I guess I could let users pick their colour profile in the future
@@ -23,7 +27,7 @@ export default class CanvasCell {
   private char: string;
 
   // default to black at full opacity
-  constructor(r = 0, g = 0, b = 0, a = 1, char = '█') {
+  constructor({ r = 0, g = 0, b = 0, a = 1, char = '█' }: CanvasCellArgs) {
     this.r = r;
     this.g = g;
     this.b = b;
@@ -31,7 +35,7 @@ export default class CanvasCell {
     this.char = char;
   }
 
-  setColours(colours: Partial<ColourRecord>): CanvasCell {
+  setColours(colours: Partial<RGBAPixel>): CanvasCell {
     for (const key in colours) {
       if (!isColourKey(key)) {
         continue;
@@ -60,13 +64,27 @@ export default class CanvasCell {
     return this;
   }
 
+  setChar(char: string) {
+    this.char = char;
+  }
+
   copy(): CanvasCell {
-    return new CanvasCell(this.r, this.g, this.b, this.a);
+    return new CanvasCell({
+      r: this.r,
+      g: this.g,
+      b: this.b,
+      a: this.a,
+      char: this.char
+    });
+  }
+
+  private pad(val: number) {
+    return val.toString().padStart(3, '0')
+
   }
 
   toString(): string {
-    const pad = (val: number) => padLeft(val, 3);
-    return `{${pad(this.r)},${pad(this.g)},${pad(this.b)},${this.a}}`;
+    return `{${this.pad(this.r)},${this.pad(this.g)},${this.pad(this.b)},${this.a}}`;
   }
 
   toColourBlock(): string {

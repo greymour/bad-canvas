@@ -1,7 +1,7 @@
 export default class Matrix<T> {
   public data: T[][];
-  private width: number;
-  private height: number;
+  public readonly width: number;
+  public readonly height: number;
   public size: number;
 
   constructor(data: T[][], width?: number, height?: number) {
@@ -61,7 +61,6 @@ export default class Matrix<T> {
         dataIdx++;
       }
     }
-
     return new Matrix(matrix, width, height);
   }
 

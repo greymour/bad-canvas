@@ -1,46 +1,116 @@
 import BadCanvas from "./BadCanvas";
 import { decodeJPEG } from "./utils/decoders";
 import Matrix from "./utils/Matrix";
-
-type Uint8 = Uint8Array[number]; // making this its own type so I don't forget these are 8 bit ints
-type RGBAPixel = {
-  r: Uint8;
-  b: Uint8;
-  g: Uint8;
-  a: Uint8;
-};
+import { Fraction, RGBAPixel } from "./utils/types";
 
 export default class CanvasImage {
   private matrix: Matrix<RGBAPixel>;
   public width: number;
   public height: number;
+  // numerator is width, denominator is height
+  private readonly correctionFactorFraction: Fraction;
+  private readonly correctionFactor: number;
 
-  constructor(imageFile: Uint8Array) {
+  constructor(imageFile: Uint8Array, correctionFactor: Fraction = [1, 1]) {
+    if (correctionFactor[1] <= 0) {
+      throw new Error(`Received invalid correctionFactor denominator for CanvasImage constructor: ${correctionFactor}. \`correctionFactor\` must be greater than 0.`);
+    }
+    this.correctionFactorFraction = correctionFactor;
+    this.correctionFactor = this.correctionFactorFraction[0] / this.correctionFactorFraction[1];
+    if (Number.isNaN(this.correctionFactor)) {
+      throw new Error('Could not calculate correction factor for supplied fraction value.');
+    }
+    // the correctionFactor value attempts to address terminal fonts being taller than they are wide, and interpolates
+    // every nth pixel, where n is the closest integer value to the `correctionFactor`.
     const rawImageData = decodeJPEG(imageFile, { useTArray: true });
     const { data, width, height } = rawImageData;
 
     if (width <= 0) {
-      throw new Error(`Received invalid width for CanvasImage constructor: ${width}. Width must be greater than 0.`);
+      throw new Error(`Received invalid width for CanvasImage constructor: ${width}. \`width\` must be greater than 0.`);
     } else if (height <= 0) {
-      throw new Error(`Received invalid height for CanvasImage constructor: ${height}. Height must be greater than 0.`);
-    } else {
-      const pixelMatrix = Matrix.fromArray(data, width * 4, height).map((row) => {
-        const pixelRow = [];
-
-        for (let i = 0; i < row.length; i += 4) {
-          pixelRow.push({
-            r: row[i],
-            g: row[i + 1],
-            b: row[i + 2],
-            a: 0,
-          } satisfies RGBAPixel);
-        }
-        return pixelRow;
-      });
-      this.matrix = pixelMatrix;
+      throw new Error(`Received invalid height for CanvasImage constructor: ${height}. \`Height\` must be greater than 0.`);
     }
-    this.width = width;
+
+    if (this.correctionFactor !== 0) {
+      this.width = Math.round(width * this.correctionFactor);
+    } else {
+      this.width = width;
+    }
     this.height = height;
+    // multiply width * 4 because each pixel has a separate value for RGBA
+    const rawRowLength = width * 4;
+
+    const pixelMatrix = Matrix.fromArray(data, rawRowLength, height).map((row) => {
+      const pixelRow = [];
+
+      for (let i = 0; i < row.length; i += 4) {
+        const pixel = {
+          r: row[i],
+          g: row[i + 1],
+          b: row[i + 2],
+          a: 0,
+        } satisfies RGBAPixel
+        pixelRow.push(pixel);
+      }
+
+      if (this.correctionFactor !== 1) {
+        this.correctRow(pixelRow, width);
+      }
+
+      if (pixelRow.length !== this.width) {
+        throw new Error(`Row wrong size, expected ${this.width} got ${pixelRow.length}`);
+      }
+      return pixelRow;
+    });
+    this.matrix = pixelMatrix;
+  }
+
+  correctRow(pixelRow: RGBAPixel[], originalWidth: number) {
+    const dif = this.width - originalWidth;
+    const bigStep = Math.round(this.correctionFactor);
+    if (bigStep === 1) {
+      return;
+    }
+    let smallStep = Math.floor(this.correctionFactor);
+
+    let lastStep = bigStep;
+    let i = 0;
+    let insertCount = 0;
+    const limit = Math.floor(dif / 2);
+    // insert first at the beginning, then from the end
+    // do this in two separate loops because otherwise the indexing gets crazy borked
+    while (insertCount <= limit) {
+      if (lastStep === smallStep && i % bigStep === 0) {
+        pixelRow.splice(i, 0, { ...pixelRow[i] });
+        lastStep = bigStep;
+        i += bigStep + 1;
+        insertCount++;
+      } else if (lastStep === bigStep && i % smallStep === 0) {
+        pixelRow.splice(i, 0, { ...pixelRow[i] });
+        lastStep = smallStep;
+        i += smallStep;
+        insertCount++;
+      } else {
+        i++;
+      }
+    }
+
+    i = pixelRow.length - 1;
+    while (insertCount < dif) {
+      if (lastStep === smallStep && i % bigStep === 0) {
+        pixelRow.splice(i, 0, { ...pixelRow[i] });
+        lastStep = bigStep;
+        i -= bigStep + 1;
+        insertCount++;
+      } else if (lastStep === bigStep && i % smallStep === 0) {
+        pixelRow.splice(i, 0, { ...pixelRow[i] });
+        lastStep = smallStep;
+        i -= smallStep;
+        insertCount++;
+      } else {
+        i--;
+      }
+    }
   }
 
   toBadCanvas(): BadCanvas {

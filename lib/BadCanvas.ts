@@ -1,4 +1,4 @@
-import CanvasCell from "./CanvasCell";
+import CanvasCell, { CanvasCellArgs } from "./CanvasCell";
 import Matrix from "./utils/Matrix";
 
 export default class BadCanvas {
@@ -7,11 +7,11 @@ export default class BadCanvas {
   public readonly height: number;
   private matrix: Matrix<CanvasCell>;
 
-  constructor(width: number, height: number) {
+  constructor(width: number, height: number, defaults: CanvasCellArgs = { r: 0, g: 0, b: 0, a: 1, char: '█' }) {
     this.width = width;
     this.height = height;
     this.matrix = new Matrix<CanvasCell>(Array(height).fill(undefined).map(() =>
-      Array(width).fill(undefined).map(() => new CanvasCell())),
+      Array(width).fill(undefined).map(() => new CanvasCell(defaults))),
       width,
       height,
     );
