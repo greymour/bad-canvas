@@ -7,7 +7,7 @@ export default class BadCanvas {
   public readonly height: number;
   private matrix: Matrix<CanvasCell>;
 
-  constructor(width: number, height: number, defaults: CanvasCellArgs = { r: 0, g: 0, b: 0, a: 1, char: '█' }) {
+  constructor(width: number, height: number, defaults: Partial<CanvasCellArgs> = { r: 0, g: 0, b: 0, a: 1, char: '█' }) {
     this.width = width;
     this.height = height;
     this.matrix = new Matrix<CanvasCell>(Array(height).fill(undefined).map(() =>
@@ -19,6 +19,16 @@ export default class BadCanvas {
 
   cellAt(x: number, y: number) {
     return this.matrix.cellAt(x, y);
+  }
+
+  // Find the cell using the Normal method that more closely matches the underlying array
+  cellAtN(rowIdx: number, colIdx: number) {
+    return this.matrix.cellAt(colIdx, rowIdx);
+  }
+
+  // Find the cell at its visual coordinates - for the artist in all of us
+  cellAtVisual(x: number, y: number) {
+    return this.matrix.cellAt(x, (this.matrix.height - 1 - y));
   }
 
   toString() {

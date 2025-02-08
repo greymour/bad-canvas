@@ -1,6 +1,10 @@
 {
   "compilerOptions": {
     "esModuleInterop": true,
-    "target": "esnext"
+    "target": "esnext",
+    "moduleResolution": "nodenext",
+    "typeRoots": [
+      "./node_modules/@types"
+    ]
   }
 }

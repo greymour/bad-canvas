@@ -3,7 +3,11 @@ import * as fs from 'node:fs';
 import path from 'path';
 import { Fraction } from "./lib/utils/types";
 import { BadCanvas } from "./lib";
+import { isFraction } from "./lib/utils/types";
+import { decodeJPEG } from "./lib/utils/decoders";
+import { extractFromJPEG } from "./lib/utils/decoders";
 
+console.clear();
 const imagePathArg = process.argv.find((arg) => arg.startsWith('--path'));
 let imagePath: string = '';
 if (imagePathArg) {
@@ -12,20 +16,21 @@ if (imagePathArg) {
 }
 
 const correctionFactorArg = process.argv.find((arg) => arg.startsWith('--cfactor'))
-let correctionFactor = [5, 3];
+let correctionFactor: Fraction = [5, 3];
 if (correctionFactorArg) {
   const rawFactor = correctionFactorArg.split('=')[1]?.trim();
   if (rawFactor) {
-    correctionFactor = rawFactor.split('/').map(val => parseInt(val));
-    if (correctionFactor.length !== 2) {
+    const parsed = rawFactor.split('/').map(val => parseInt(val));
+    if (!isFraction(parsed)) {
       throw new Error(`correctionFactor must have the shape 'X/Y', received ${rawFactor}`);
     }
+    correctionFactor = parsed;
   }
 }
 
 if (imagePath) {
   const file = fs.readFileSync(imagePath);
-  const canvasImage = new CanvasImage(new Uint8Array(file), correctionFactor as Fraction);
+  const canvasImage = new CanvasImage(new Uint8Array(file), decodeJPEG, extractFromJPEG, correctionFactor as Fraction);
   const bc = canvasImage.toBadCanvas();
   console.log(bc.render());
 }

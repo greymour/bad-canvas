@@ -1,17 +1,17 @@
 import BadCanvas from "./BadCanvas";
-import { decodeJPEG } from "./utils/decoders";
+import { Decoder, Extractor } from "./utils/decoders";
 import Matrix from "./utils/Matrix";
-import { Fraction, RGBAPixel } from "./utils/types";
+import { RGBPixel, Fraction } from "./utils/types";
 
-export default class CanvasImage {
-  private matrix: Matrix<RGBAPixel>;
+export default class CanvasImage<ImageType> {
+  private matrix: Matrix<RGBPixel>;
   public width: number;
   public height: number;
   // numerator is width, denominator is height
   private readonly correctionFactorFraction: Fraction;
   private readonly correctionFactor: number;
 
-  constructor(imageFile: Uint8Array, correctionFactor: Fraction = [1, 1]) {
+  constructor(imageFile: Uint8Array, decoder: Decoder<ImageType>, extractor: Extractor, correctionFactor: Fraction = [1, 1]) {
     if (correctionFactor[1] <= 0) {
       throw new Error(`Received invalid correctionFactor denominator for CanvasImage constructor: ${correctionFactor}. \`correctionFactor\` must be greater than 0.`);
     }
@@ -22,8 +22,7 @@ export default class CanvasImage {
     }
     // the correctionFactor value attempts to address terminal fonts being taller than they are wide, and interpolates
     // every nth pixel, where n is the closest integer value to the `correctionFactor`.
-    const rawImageData = decodeJPEG(imageFile, { useTArray: true });
-    const { data, width, height } = rawImageData;
+    const { data, width, height } = decoder(imageFile);
 
     if (width <= 0) {
       throw new Error(`Received invalid width for CanvasImage constructor: ${width}. \`width\` must be greater than 0.`);
@@ -37,21 +36,9 @@ export default class CanvasImage {
       this.width = width;
     }
     this.height = height;
-    // multiply width * 4 because each pixel has a separate value for RGBA
-    const rawRowLength = width * 4;
 
-    const pixelMatrix = Matrix.fromArray(data, rawRowLength, height).map((row) => {
-      const pixelRow = [];
-
-      for (let i = 0; i < row.length; i += 4) {
-        const pixel = {
-          r: row[i],
-          g: row[i + 1],
-          b: row[i + 2],
-          a: 0,
-        } satisfies RGBAPixel
-        pixelRow.push(pixel);
-      }
+    const pixelMatrix = Matrix.fromArray(data, height).map((row) => {
+      const pixelRow = extractor(row);
 
       if (this.correctionFactor !== 1) {
         this.correctRow(pixelRow, width);
@@ -65,7 +52,7 @@ export default class CanvasImage {
     this.matrix = pixelMatrix;
   }
 
-  correctRow(pixelRow: RGBAPixel[], originalWidth: number) {
+  correctRow(pixelRow: RGBPixel[], originalWidth: number) {
     const dif = this.width - originalWidth;
     const bigStep = Math.round(this.correctionFactor);
     if (bigStep === 1) {

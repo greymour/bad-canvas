@@ -1,7 +1,7 @@
-import { rgbToAnsiTrueColorBG, rgbToAnsiTrueColorFG } from "./utils/colours";
-import { RGBAPixel } from "./utils/types";
+import { rgbToAnsiTrueColourBG, rgbToAnsiTrueColourFG } from "./utils/colours";
+import { RGBPixel } from "./utils/types";
 
-type ColourKey = keyof RGBAPixel;
+type ColourKey = keyof RGBPixel;
 
 const COLOUR_KEYS: ColourKey[] = ["r", "g", "b", "a"] as const;
 
@@ -10,7 +10,7 @@ function isColourKey(key: string): key is ColourKey {
   return COLOUR_KEYS.includes(key);
 }
 
-export type CanvasCellArgs = RGBAPixel & {
+export type CanvasCellArgs = RGBPixel & {
   char?: string;
 }
 
@@ -26,16 +26,15 @@ export default class CanvasCell {
 
   private char: string;
 
-  // default to black at full opacity
-  constructor({ r = 0, g = 0, b = 0, a = 1, char = '█' }: CanvasCellArgs) {
+  // default to black
+  constructor({ r = 0, g = 0, b = 0, char = '█' }: Partial<CanvasCellArgs>) {
     this.r = r;
     this.g = g;
     this.b = b;
-    this.a = a;
     this.char = char;
   }
 
-  setColours(colours: Partial<RGBAPixel>): CanvasCell {
+  setColours(colours: Partial<RGBPixel>): CanvasCell {
     for (const key in colours) {
       if (!isColourKey(key)) {
         continue;
@@ -89,9 +88,9 @@ export default class CanvasCell {
 
   toColourBlock(): string {
     if (this.char === ' ') {
-      return `${rgbToAnsiTrueColorBG(this.r, this.g, this.b)}${this.char}\x1b[0m`;
+      return `${rgbToAnsiTrueColourBG(this.r, this.g, this.b)}${this.char}\x1b[0m`;
     } else {
-      return `${rgbToAnsiTrueColorFG(this.r, this.g, this.b)}${this.char}\x1b[0m`;
+      return `${rgbToAnsiTrueColourFG(this.r, this.g, this.b)}${this.char}\x1b[0m`;
     }
   }
 }

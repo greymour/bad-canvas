@@ -1,17 +1,37 @@
 import jpeg from 'jpeg-js';
+import { RGBPixel } from './types';
 
-export type JPEGData = {
+export type ImageData<T = {}> = T & {
   width: number;
   height: number;
-  exifBuffer?: unknown;
   data: Uint8Array;
 }
 
-type DecodeJPEGOptions = Parameters<typeof jpeg['decode']>[1];
+export type Decoder<T> = (buf: Uint8Array) => ImageData<T>;
 
-export function decodeJPEG(buf: Uint8Array, options?: DecodeJPEGOptions): JPEGData {
-  const opts = options ? { ...options, useTArray: true } : { useTArray: true };
-  // jpeg.decode() expects a `Buffer`, not a plain `Uint8Array`, but it works just fine (lol, lmao even)
-  // doing this for cross-platform compat (*cough* Deno) until I write my own decoder
-  return jpeg.decode(buf, opts) as JPEGData;
+// a callback function that extracts pixel values from one row of image data
+export type Extractor = (data: Uint8Array) => RGBPixel[];
+
+export type JPEGData = ImageData<{
+  exifBuffer?: Uint8Array;
+}>;
+
+// jpeg.decode() expects a `Buffer`, not a plain `Uint8Array`, but it works just fine (lol, lmao even)
+// doing this for cross-platform compat (*cough* Deno) until I write my own decoder
+export const decodeJPEG: Decoder<JPEGData> = (buf: Uint8Array) => jpeg.decode(buf, { useTArray: true });
+
+export const extractFromJPEG: Extractor = (row) => {
+  const pixelRow: RGBPixel[] = [];
+
+  // the data here has the pattern [r, g, b, a, r, g, b, a], so grab the data in groups of 4 and ignore the
+  // alpha channel
+  for (let i = 0; i < row.length; i += 4) {
+    pixelRow.push({
+      r: row[i],
+      g: row[i + 1],
+      b: row[i + 2],
+    });
+  }
+
+  return pixelRow;
 }

@@ -15,7 +15,7 @@ export default class Matrix<T> {
     this.width = width;
     this.height = height;
 
-    this.data = data as T[][]; // we assume that if the first value in `data` is another array, that everthing is
+    this.data = data;
     this.size = data.reduce((acc, row) => (row.length + acc), 0);
   }
 
@@ -48,7 +48,8 @@ export default class Matrix<T> {
     return newMatrix;
   }
 
-  static fromArray<U extends ArrayLike<unknown>>(data: U, width: number, height: number): Matrix<U[number]> {
+  static fromArray<U extends ArrayLike<unknown>>(data: U, height: number): Matrix<U[number]> {
+    const width = Math.ceil(data.length / height);
     if (width <= 0 || height <= 0) {
       throw new Error(`Cannot create matrix with the provided dimensions. Received width: ${width} and height: ${height}`);
     }
