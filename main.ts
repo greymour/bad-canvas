@@ -1,7 +1,9 @@
-import CanvasImage from "./lib/CanvasImage";
 import * as fs from 'node:fs';
 import * as path from 'path';
 import * as jpeg from 'jpeg-js';
+import { fileURLToPath } from 'url';
+
+import CanvasImage from "./lib/CanvasImage";
 import { Fraction } from "./lib/utils/types";
 import { BadCanvas } from "./lib";
 import { isFraction } from "./lib/utils/types";
@@ -11,6 +13,10 @@ import { RGBPixel } from "./lib/utils/types";
 type JPEGData = ImageData<{
   exifBuffer?: Uint8Array;
 }>;
+
+// this fixes the "__dirname is not defined in ES module scope" error when running the demo in Node
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // jpeg.decode() expects a `Buffer`, not a plain `Uint8Array`, but it works just fine (lol, lmao even)
 // doing this for cross-platform compat (*cough* Deno)
