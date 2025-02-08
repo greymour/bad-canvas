@@ -38,7 +38,8 @@ export default class CanvasImage<ImageType> {
     this.height = height;
 
     const pixelMatrix = Matrix.fromArray(data, height).map((row) => {
-      const pixelRow = extractor(row);
+      // can safely assert the type here since the rows in the intermediate Matrix are guaranteed to be Uint8Arrays
+      const pixelRow = extractor(row as unknown as Uint8Array);
 
       if (this.correctionFactor !== 1) {
         this.correctRow(pixelRow, width);
@@ -107,7 +108,10 @@ export default class CanvasImage<ImageType> {
       for (let rowIdx = 0; rowIdx < this.width; rowIdx++) {
         const cell = canvas.cellAt(rowIdx, colIdx);
         const pixel = this.matrix.cellAt(rowIdx, colIdx);
-        cell?.setColours(pixel);
+        if (!cell || !pixel) {
+          throw new Error(`Mismatch between canvas and matrix dimensions, this indicates a serious regression. cell: ${cell} pixel: ${pixel}`);
+        }
+        cell.setColours(pixel);
       }
     }
     return canvas;

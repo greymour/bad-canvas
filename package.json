@@ -1,10 +1,40 @@
 {
+  "name": "bad-canvas",
+  "author": "Kurt Steigleder",
+  "email": "kurtsteigleder@gmail.com",
+  "version": "0.0.1",
+  "type": "module",
   "scripts": {
-    "start": "npx tsx ./main.ts"
+    "start": "npx tsx ./main.ts",
+    "build": "rm -rf ./dist && tsc && vite build --mode production",
+    "test": "echo ERROR: TESTS NOT SETUP",
+    "dev": "rm -rf ./dist && tsc && vite build --mode development && yalc publish"
+  },
+  "files": [
+    "dist"
+  ],
+  "types": "./dist/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "*": [
+        "dist/index.d.ts"
+      ]
+    }
+  },
+  "main": "./dist/index.umd.cjs",
+  "module": "./dist/index.js",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.umd.cjs"
+    }
   },
   "devDependencies": {
     "@types/node": "^22.13.1",
+    "jpeg-js": "^0.4.4",
     "tsx": "^4.19.2",
-    "jpeg-js": "^0.4.4"
+    "typescript": "^5.7.3",
+    "vite": "^6.1.0",
+    "yalc": "^1.0.0-pre.53"
   }
 }

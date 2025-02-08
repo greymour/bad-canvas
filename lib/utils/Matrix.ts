@@ -4,7 +4,7 @@ export default class Matrix<T> {
   public readonly height: number;
   public size: number;
 
-  constructor(data: T[][], width?: number, height?: number) {
+  constructor(data: T[][], width: number, height: number) {
     if (width <= 0 || height <= 0) {
       throw new Error(`Cannot create matrix with the provided dimensions. Received width: ${width} and height: ${height}`);
     }

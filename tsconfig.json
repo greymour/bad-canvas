@@ -1,10 +1,25 @@
 {
   "compilerOptions": {
-    "esModuleInterop": true,
     "target": "esnext",
-    "moduleResolution": "nodenext",
+    "useDefineForClassFields": true,
+    "module": "esnext",
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "declaration": true,
+    "declarationDir": "dist",
+    "emitDeclarationOnly": true,
+
     "typeRoots": [
       "./node_modules/@types"
-    ]
-  }
+    ],
+
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "isolatedModules": true,
+
+    "strict": true,
+    "noUnusedLocals": true
+  },
+  "include": ["lib"],
+  "exclude": ["node_modules"]
 }

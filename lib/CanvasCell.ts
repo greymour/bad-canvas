@@ -3,7 +3,7 @@ import { RGBPixel } from "./utils/types";
 
 type ColourKey = keyof RGBPixel;
 
-const COLOUR_KEYS: ColourKey[] = ["r", "g", "b", "a"] as const;
+const COLOUR_KEYS: ColourKey[] = ["r", "g", "b"] as const;
 
 function isColourKey(key: string): key is ColourKey {
   // @ts-expect-error checking for a string in a list of constants, Array.prototype.includes() is so strict
@@ -21,8 +21,6 @@ export default class CanvasCell {
   private g: number;
 
   private b: number;
-
-  private a: number;
 
   private char: string;
 
@@ -45,18 +43,11 @@ export default class CanvasCell {
           `Received value of incorrect type when setting colours. Expected type number, received type ${typeof colourValue}`,
         );
       }
-      if (key === "a") {
-        if (colourValue < 0 || colourValue > 1) {
-          throw new Error(
-            `Attempting to set opacity to an invalid value: ${colourValue}. Value must be in the range 0 <= x <= 1.`,
-          );
-        }
-      } else {
-        if (colourValue < 0 || colourValue > 255) {
-          throw new Error(
-            `Attempting to set colour of key ${key} to an invalid value: ${colourValue}. Value must be in the range 0 <= x <= 255`,
-          );
-        }
+
+      if (colourValue < 0 || colourValue > 255) {
+        throw new Error(
+          `Attempting to set colour of key ${key} to an invalid value: ${colourValue}. Value must be in the range 0 <= x <= 255`,
+        );
       }
       this[key] = colours[key]!;
     }
@@ -72,7 +63,6 @@ export default class CanvasCell {
       r: this.r,
       g: this.g,
       b: this.b,
-      a: this.a,
       char: this.char
     });
   }
@@ -83,7 +73,7 @@ export default class CanvasCell {
   }
 
   toString(): string {
-    return `{${this.pad(this.r)},${this.pad(this.g)},${this.pad(this.b)},${this.a}}`;
+    return `{${this.pad(this.r)},${this.pad(this.g)},${this.pad(this.b)}}`;
   }
 
   toColourBlock(): string {

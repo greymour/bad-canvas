@@ -7,7 +7,7 @@ export default class BadCanvas {
   public readonly height: number;
   private matrix: Matrix<CanvasCell>;
 
-  constructor(width: number, height: number, defaults: Partial<CanvasCellArgs> = { r: 0, g: 0, b: 0, a: 1, char: '█' }) {
+  constructor(width: number, height: number, defaults: Partial<CanvasCellArgs> = { r: 0, g: 0, b: 0, char: '█' }) {
     this.width = width;
     this.height = height;
     this.matrix = new Matrix<CanvasCell>(Array(height).fill(undefined).map(() =>
