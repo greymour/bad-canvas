@@ -25,3 +25,32 @@ test('constructor', () => {
   expect(() => new CanvasCell({ r: 300 })).toThrow();
   expect(() => new CanvasCell({ g: -5 })).toThrow();
 });
+
+test('toJSON', () => {
+  const c = new CanvasCell({
+    r: 1,
+    g: 20,
+    b: 255,
+  });
+  expect(c.toJSON()).toEqual({
+    r: 1,
+    g: 20,
+    b: 255,
+    char: '█',
+  });
+});
+
+test('toJSONString', () => {
+  const c = new CanvasCell({
+    r: 1,
+    g: 20,
+    b: 255,
+  });
+  expect(c.toJSONString()).toEqual(JSON.stringify({
+    r: 1,
+    g: 20,
+    b: 255,
+    char: '█',
+  }));
+
+});

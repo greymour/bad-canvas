@@ -47,6 +47,14 @@ export default class Canvas {
     return this.matrix;
   }
 
+  toJSON() {
+    return this.matrix.map(row => row.map(cell => cell.toJSON()));
+  }
+
+  toJSONString() {
+    return this.matrix.map(row => row.map(cell => cell.toJSONString()));
+  }
+
   *[Symbol.iterator]() {
     for (const cell of this.matrix) {
       yield cell;

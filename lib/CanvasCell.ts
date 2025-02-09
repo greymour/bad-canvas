@@ -14,6 +14,8 @@ export type CanvasCellArgs = RGBPixel & {
   char?: string;
 }
 
+type CanvasCellData = Required<CanvasCellArgs>;
+
 // Using RGBA for colour values. I guess I could let users pick their colour profile in the future
 export default class CanvasCell {
   private r: number;
@@ -84,6 +86,19 @@ export default class CanvasCell {
 
   toString(): string {
     return `{${this.pad(this.r)},${this.pad(this.g)},${this.pad(this.b)}}`;
+  }
+
+  toJSON(): CanvasCellData {
+    return {
+      r: this.r,
+      g: this.g,
+      b: this.b,
+      char: this.char,
+    }
+  }
+
+  toJSONString(): string {
+    return `{"r":${this.r},"g":${this.g},"b":${this.b},"char":"${this.char}"}`;
   }
 
   toColourBlock(): string {
