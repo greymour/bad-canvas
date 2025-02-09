@@ -24,15 +24,15 @@ export default class CanvasCell {
 
   private char: string;
 
-  // default to black
-  constructor({ r = 0, g = 0, b = 0, char = '█' }: Partial<CanvasCellArgs>) {
+  // default to white
+  constructor({ r = 255, g = 255, b = 255, char = '█' }: Partial<CanvasCellArgs>) {
     this.r = r;
     this.g = g;
     this.b = b;
     this.char = char;
   }
 
-  setColours(colours: Partial<RGBPixel>): CanvasCell {
+  paint(colours: Partial<RGBPixel>): CanvasCell {
     for (const key in colours) {
       if (!isColourKey(key)) {
         continue;

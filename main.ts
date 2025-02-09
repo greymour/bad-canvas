@@ -4,9 +4,9 @@ import * as jpeg from 'jpeg-js';
 import { fileURLToPath } from 'url';
 
 import CanvasImage from "./lib/CanvasImage";
-import { Fraction } from "./lib/utils/types";
-import { BadCanvas } from "./lib";
-import { isFraction } from "./lib/utils/types";
+import { Ratio } from "./lib/utils/types";
+import { Canvas } from "./lib";
+import { isRatio } from "./lib/utils/types";
 import { Decoder, Extractor, ImageData } from "./lib/utils/decoders";
 import { RGBPixel } from "./lib/utils/types";
 
@@ -47,12 +47,12 @@ if (imagePathArg) {
 }
 
 const correctionFactorArg = process.argv.find((arg) => arg.startsWith('--cfactor'))
-let correctionFactor: Fraction = [5, 3];
+let correctionFactor: Ratio = [5, 3];
 if (correctionFactorArg) {
   const rawFactor = correctionFactorArg.split('=')[1]?.trim();
   if (rawFactor) {
     const parsed = rawFactor.split('/').map(val => parseInt(val));
-    if (!isFraction(parsed)) {
+    if (!isRatio(parsed)) {
       throw new Error(`correctionFactor must have the shape 'X/Y', received ${rawFactor}`);
     }
     correctionFactor = parsed;
@@ -61,14 +61,14 @@ if (correctionFactorArg) {
 
 if (imagePath) {
   const file = fs.readFileSync(imagePath);
-  const canvasImage = new CanvasImage(new Uint8Array(file), decodeJPEG, extractFromJPEG, correctionFactor as Fraction);
-  const bc = canvasImage.toBadCanvas();
-  console.log(bc.render());
+  const canvasImage = new CanvasImage(new Uint8Array(file), decodeJPEG, extractFromJPEG, correctionFactor as Ratio);
+  const c = canvasImage.toCanvas();
+  console.log(c.render());
 }
 
 
 // create the initial canvas and give it a yellow background
-const badCanvas = new BadCanvas(5, 4, {
+const canvas = new Canvas(5, 4, {
   r: 255,
   g: 213,
   b: 40,
@@ -86,10 +86,10 @@ const coords = [
 ];
 
 // draw a smile!
-coords.forEach(([x, y]) => badCanvas.cellAt(x, y)?.setColours({
+coords.forEach(([x, y]) => canvas.cellAt(x, y)?.paint({
   r: 0,
   g: 0,
   b: 0,
 }));
 
-console.log(badCanvas.render());
+console.log(canvas.render());

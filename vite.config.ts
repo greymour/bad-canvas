@@ -9,10 +9,10 @@ export default defineConfig(({ mode }: ConfigEnv) => {
       },
       lib: {
         entry: resolve(__dirname, 'lib/index.ts'),
-        name: 'Bad Canvas',
+        name: 'Pointillism',
         fileName: 'index',
       },
-      minify: 'esbuild',
+      minify: 'esbuild' as 'esbuild', // getting type errors without this ???, I love TypeScript
       reportCompressedSize: true,
     },
     esbuild: {

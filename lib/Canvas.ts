@@ -1,13 +1,13 @@
 import CanvasCell, { CanvasCellArgs } from "./CanvasCell";
 import Matrix from "./utils/Matrix";
 
-export default class BadCanvas {
+export default class Canvas {
   public readonly width: number;
 
   public readonly height: number;
   private matrix: Matrix<CanvasCell>;
 
-  constructor(width: number, height: number, defaults: Partial<CanvasCellArgs> = { r: 0, g: 0, b: 0, char: '█' }) {
+  constructor(width: number, height: number, defaults: Partial<CanvasCellArgs> = { r: 255, g: 255, b: 255, char: '█' }) {
     this.width = width;
     this.height = height;
     this.matrix = new Matrix<CanvasCell>(Array(height).fill(undefined).map(() =>

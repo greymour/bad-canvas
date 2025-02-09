@@ -1,21 +1,20 @@
-import BadCanvas from "./BadCanvas";
+import Canvas from "./Canvas";
 import CanvasImage from "./CanvasImage";
 import CanvasCell from "./CanvasCell";
-import { RGBPixel, Fraction, isFraction } from "./utils/types";
+import { RGBPixel, Ratio, isRatio } from "./utils/types";
 import { ImageData, Decoder, Extractor } from "./utils/decoders";
 
 export {
-  BadCanvas,
+  Canvas,
   CanvasImage,
   CanvasCell,
-  isFraction,
+  isRatio,
 }
 
 export type {
   RGBPixel,
-  Fraction,
+  Ratio,
   ImageData,
   Decoder,
   Extractor,
-
 }

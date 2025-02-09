@@ -1,24 +1,24 @@
-import BadCanvas from "./BadCanvas";
+import Canvas from "./Canvas";
 import { Decoder, Extractor } from "./utils/decoders";
 import Matrix from "./utils/Matrix";
-import { RGBPixel, Fraction } from "./utils/types";
+import { RGBPixel, Ratio } from "./utils/types";
 
 export default class CanvasImage<ImageType> {
   private matrix: Matrix<RGBPixel>;
   public width: number;
   public height: number;
   // numerator is width, denominator is height
-  private readonly correctionFactorFraction: Fraction;
+  private readonly correctionFactorRatio: Ratio;
   private readonly correctionFactor: number;
 
-  constructor(imageFile: Uint8Array, decoder: Decoder<ImageType>, extractor: Extractor, correctionFactor: Fraction = [1, 1]) {
+  constructor(imageFile: Uint8Array, decoder: Decoder<ImageType>, extractor: Extractor, correctionFactor: Ratio = [1, 1]) {
     if (correctionFactor[1] <= 0) {
       throw new Error(`Received invalid correctionFactor denominator for CanvasImage constructor: ${correctionFactor}. \`correctionFactor\` must be greater than 0.`);
     }
-    this.correctionFactorFraction = correctionFactor;
-    this.correctionFactor = this.correctionFactorFraction[0] / this.correctionFactorFraction[1];
+    this.correctionFactorRatio = correctionFactor;
+    this.correctionFactor = this.correctionFactorRatio[0] / this.correctionFactorRatio[1];
     if (Number.isNaN(this.correctionFactor)) {
-      throw new Error('Could not calculate correction factor for supplied fraction value.');
+      throw new Error('Could not calculate correction factor for supplied ratio value.');
     }
     // the correctionFactor value attempts to address terminal fonts being taller than they are wide, and interpolates
     // every nth pixel, where n is the closest integer value to the `correctionFactor`.
@@ -101,8 +101,8 @@ export default class CanvasImage<ImageType> {
     }
   }
 
-  toBadCanvas(): BadCanvas {
-    const canvas = new BadCanvas(this.width, this.height);
+  toCanvas(): Canvas {
+    const canvas = new Canvas(this.width, this.height);
 
     for (let colIdx = 0; colIdx < this.height; colIdx++) {
       for (let rowIdx = 0; rowIdx < this.width; rowIdx++) {
@@ -111,7 +111,7 @@ export default class CanvasImage<ImageType> {
         if (!cell || !pixel) {
           throw new Error(`Mismatch between canvas and matrix dimensions, this indicates a serious regression. cell: ${cell} pixel: ${pixel}`);
         }
-        cell.setColours(pixel);
+        cell.paint(pixel);
       }
     }
     return canvas;
