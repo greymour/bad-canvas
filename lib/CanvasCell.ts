@@ -26,10 +26,20 @@ export default class CanvasCell {
 
   // default to white
   constructor({ r = 255, g = 255, b = 255, char = '█' }: Partial<CanvasCellArgs>) {
+    if (!this.colourInSafeRange(r) || !this.colourInSafeRange(g) || !this.colourInSafeRange(b)) {
+      throw new Error(
+        `All RGB values must be in the range 0 <= x <= 255. Received RGB values: ${r} ${g} ${b}`,
+      );
+    }
+
     this.r = r;
     this.g = g;
     this.b = b;
     this.char = char;
+  }
+
+  colourInSafeRange(colourVal: number): boolean {
+    return 0 <= colourVal && colourVal <= 255;
   }
 
   paint(colours: Partial<RGBPixel>): CanvasCell {
@@ -44,7 +54,7 @@ export default class CanvasCell {
         );
       }
 
-      if (colourValue < 0 || colourValue > 255) {
+      if (!this.colourInSafeRange(colourValue)) {
         throw new Error(
           `Attempting to set colour of key ${key} to an invalid value: ${colourValue}. Value must be in the range 0 <= x <= 255`,
         );

@@ -12,8 +12,8 @@ export default class CanvasImage<ImageType> {
   private readonly correctionFactor: number;
 
   constructor(imageFile: Uint8Array, decoder: Decoder<ImageType>, extractor: Extractor, correctionFactor: Ratio = [1, 1]) {
-    if (correctionFactor[1] <= 0) {
-      throw new Error(`Received invalid correctionFactor denominator for CanvasImage constructor: ${correctionFactor}. \`correctionFactor\` must be greater than 0.`);
+    if (correctionFactor[1] <= 1) {
+      throw new Error(`Received invalid correctionFactor denominator for CanvasImage constructor: ${correctionFactor}. \`correctionFactor\` must be greater than 1 as CanvasImage does not support squishing images vertically.`);
     }
     this.correctionFactorRatio = correctionFactor;
     this.correctionFactor = this.correctionFactorRatio[0] / this.correctionFactorRatio[1];
