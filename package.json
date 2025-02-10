@@ -2,7 +2,7 @@
   "name": "pointillism",
   "author": "Kurt Steigleder",
   "email": "kurtsteigleder@gmail.com",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "type": "module",
   "scripts": {
     "start": "tsx ./main.ts",
